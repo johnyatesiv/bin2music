@@ -17,3 +17,8 @@ v0. read in binary and output musical notes with their tempo and duration
 v1. read in binary and output to 4 separate tracks
 v2. render the output as MIDI
 v3. stream to MIDI
+
+# notes
+
+5/11/2015 - realizing now that chunking the input buffer into 8bit pieces may not be sufficient for
+making the MIDI decisions, might need to switch to 12bit or 16bit

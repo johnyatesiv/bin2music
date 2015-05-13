@@ -1,31 +1,50 @@
-
-var midi = {};
+var debug = require('debug')('midi');
 
 //docs on the file format: http://faydoc.tripod.com/formats/mid.htm
 
-var notes =  {
-    'c' : 0,
-    'c#': 1,
-    'd': 2,
-    'd#': 3,
-    'e': 4,
-    'f': 5,
-    'g': 6,
-    'g#': 7,
-    'a': 8,
-    'a#': 9,
-    'b': 10
+function convert(first, second) {
+    var octave = null;
+    var note = null;
+    var command = null;
+    var output = null;
+
+    if(typeof second == 'integer') {
+        octave = second;
+    } else {
+        octave = 4;
+    }
+
+    //TODO need to determine if the note is on/off and whatever
+    //TODO need to assign each track a channel upon instantiation somehow
+
+    if(!isNaN(first) || first == 'a') {
+        output = hexify(getnote(first, octave));
+    } else {
+        output = hexify(getcommand(first, octave));
+    }
+
+    //TODO here is where everything stops, need to pass the args to the various functions as hex and write
+
+    if(output != null) {
+        write(output);
+        return true;
+    } else {
+        debug('error in generating a command in the midi lib');
+        throw new Error();
+    }
 }
 
-function convert(instructions) {
-    for(data in instructions) {
-        debug(data+' '+instructions[data]);
-    }
+function hexify(val) {
+    return val;
 }
 
 function getnote(note, octave) {
     return (notes[note] + 12*octave);
 
+}
+
+function getcommand(first, octave) {
+    return commands[first](first, octave);
 }
 
 //note "at" usually means "after touch"
@@ -50,96 +69,124 @@ function headers() {
 
 }
 
-function tracks() {
-
+function write(data) {
+    var file = 'output.mid';
 }
 
 function endtrack() {
-    return 'FF2F00';
+    write('FF2F00');
 }
 
-function noteoff(channel, note, velocity) {
+var noteoff = function(channel, note, velocity) {
     return '8'+channel+note+velocity;
 }
 
-function noteon(channel, note, velocity) {
+var noteon = function(channel, note, velocity) {
     return '9'+channel+note+velocity;
 }
 
-function keyat(channel, note, velocity) {
+var keyat = function(channel, note, velocity) {
     return 'A'+channel+note+velocity;
 }
 
-function controlchange(channel, controller, value) {
+var controlchange = function(channel, controller, value) {
     return 'B'+channel+controller+value;
 }
 
-function programchange(channel, program) {
+var programchange = function(channel, program) {
     return 'C'+channel+program;
 }
 
-function channelat(channel, newchannel) {
+var channelat = function(channel, newchannel) {
     return 'D'+channel+newchannel;
 }
 
-function pitchwheel(channel, bottom, top) {
+var pitchwheel = function(channel, bottom, top) {
     return 'E'+channel+bottom+top;
 }
 
 //meta events
 //all meta events start with FF followed by the command xx, the length nn and the data dd
-function settracksequencenum(seq_num) {
+var settracksequencenum = function(seq_num) {
     return 'FF0002'+seq_num;
 }
 
-function textevent(text) {
+var textevent = function(text) {
     //nn here is byte length
     return 'FF01nn'+text;
 }
 
-function copyrighttext(text) {
+var copyrighttext = function(text) {
     return 'FF02nn'+text;
 }
 
-function sequencetrackname(text) {
+var sequencetrackname = function(text) {
     return 'FF03nn'+text;
 }
 
-function trackinstrumentname(text) {
+var trackinstrumentname = function(text) {
     return 'FF04nn'+text;
 }
 
-function lyric(text) {
+var lyric = function(text) {
     return 'FF05nn'+text;
 }
 
-function marker(text) {
+var marker = function(text) {
     return 'FF06nn'+text;
 }
-function cuepoint(text) {
+
+var cuepoint = function(text) {
     return 'FF07nn'+text;
 }
 
-function settempo(tempo) {
+var settempo = function(tempo) {
     //tempo arg is microseconds per quarter note so convert to BPM
     //should be 24 bits
     return 'FF5103'+tempo;
 }
 
-function settimesignature(numerator, denominator) {
+var settimesignature = function(numerator, denominator) {
     //ccbb from the spec should mostly be 4 and 32
     return 'FF5804'+numerator+denominator+'0420'; //<-- not sure this is right
 }
 
-function keysignature(key, mode) {
+var keysignature = function(key, mode) {
     //mode in the musical sense, short hand for major = 0/minor = 1
     //key actually represents the number of sharps and flats
     return 'FF5902'+key+mode;
 }
 
-function sequencerinfo(bytes2send, data) {
+var sequencerinfo = function(bytes2send, data) {
     return 'FF7F'+bytes2send+data;
 }
 
+//some necessary maps
+
+var notes =  {
+    0: 0, //c
+    1: 1, //c#
+    2: 2, //d
+    3: 3, //d#
+    4: 4, //e
+    5: 5, //f
+    6: 6, //g
+    7: 7, //g#
+    8: 8, //a
+    9: 9, //a#
+    A: 10 //b
+};
+
+var commands = {
+    b: noteon,
+    c: noteoff,
+    d: keyat,
+    e: channelat,
+    f: noteoff
+};
+
+var midi = {};
+
 midi.convert = convert;
+midi.endtrack = endtrack;
 module.exports = midi;
