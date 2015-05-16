@@ -7,10 +7,11 @@ function parse(input) {
     var tracks = chunky(str, length);
 
     for(var t=0;t<4;t++) {
-
-        for(var i=0;i<tracks[t].length;i++) {
-            midi.convert(tracks[t][i], tracks[t][i+1]);
-            i++;
+        while(tracks[t].length>0) {
+            var first = tracks[t].slice(0,1);
+            var second = tracks[t].slice(2,6);
+            tracks[t] = tracks[t].slice(6, tracks[t].length);
+            midi.convert(first, second);
         }
 
         midi.endtrack();

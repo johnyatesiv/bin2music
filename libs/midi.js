@@ -8,8 +8,8 @@ function convert(first, second) {
     var command = null;
     var output = null;
 
-    if(typeof second == 'integer') {
-        octave = second;
+    if(typeof first[1] == 'integer') {
+        octave = first[1];
     } else {
         octave = 4;
     }
@@ -17,21 +17,26 @@ function convert(first, second) {
     //TODO need to determine if the note is on/off and whatever
     //TODO need to assign each track a channel upon instantiation somehow
 
-    if(!isNaN(first) || first == 'a') {
-        output = hexify(getnote(first, octave));
-    } else {
-        output = hexify(getcommand(first, octave));
+    if(isNaN(first[0])) {
+        octave += 1;
     }
 
-    //TODO here is where everything stops, need to pass the args to the various functions as hex and write
+    note = hexify(getnote(first[0], octave));
+    command = hexify(getcommand(second));
 
-    if(output != null) {
-        write(output);
-        return true;
-    } else {
-        debug('error in generating a command in the midi lib');
-        throw new Error();
-    }
+    debug(command);
+
+//    output = 'hi';
+//
+//    //TODO here is where everything stops, need to pass the args to the various functions as hex and write
+//
+//    if(output != null) {
+//        write(output);
+//        return true;
+//    } else {
+//        debug('error in generating a command in the midi lib');
+//        throw new Error();
+//    }
 }
 
 function hexify(val) {
@@ -43,8 +48,8 @@ function getnote(note, octave) {
 
 }
 
-function getcommand(first, octave) {
-    return commands[first](first, octave);
+function getcommand(second) {
+    return commands[second[0]](second[1]);
 }
 
 //note "at" usually means "after touch"
@@ -174,12 +179,29 @@ var notes =  {
     7: 7, //g#
     8: 8, //a
     9: 9, //a#
-    A: 10 //b
+    a: 10, //b
+    b: 0, //c
+    c: 1, //c#
+    d: 2, //d
+    e: 3, //d#
+    f: 4 //e
 };
 
 var commands = {
+    0: noteon,
+    1: noteon,
+    2: noteoff,
+    3: noteon,
+    4: noteon,
+    5: noteoff,
+    6: noteon,
+    7: noteon,
+    8: noteoff,
+    9: noteon,
+    10: noteon,
+    a: noteoff,
     b: noteon,
-    c: noteoff,
+    c: noteon,
     d: keyat,
     e: channelat,
     f: noteoff
