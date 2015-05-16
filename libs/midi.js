@@ -8,8 +8,8 @@ function convert(first, second) {
     var command = null;
     var output = null;
 
-    if(typeof second == 'integer') {
-        octave = second;
+    if(typeof first[1] == 'integer') {
+        octave = first[1];
     } else {
         octave = 4;
     }
@@ -17,21 +17,26 @@ function convert(first, second) {
     //TODO need to determine if the note is on/off and whatever
     //TODO need to assign each track a channel upon instantiation somehow
 
-    if(!isNaN(first) || first == 'a') {
-        output = hexify(getnote(first, octave));
-    } else {
-        output = hexify(getcommand(first, octave));
+    if(isNaN(first[0])) {
+        octave += 1;
     }
 
-    //TODO here is where everything stops, need to pass the args to the various functions as hex and write
+    note = hexify(getnote(first[0], octave));
+    command = hexify(getcommand(second));
 
-    if(output != null) {
-        write(output);
-        return true;
-    } else {
-        debug('error in generating a command in the midi lib');
-        throw new Error();
-    }
+    debug(command);
+
+//    output = 'hi';
+//
+//    //TODO here is where everything stops, need to pass the args to the various functions as hex and write
+//
+//    if(output != null) {
+//        write(output);
+//        return true;
+//    } else {
+//        debug('error in generating a command in the midi lib');
+//        throw new Error();
+//    }
 }
 
 function hexify(val) {
@@ -43,8 +48,8 @@ function getnote(note, octave) {
 
 }
 
-function getcommand(first, octave) {
-    return commands[first](first, octave);
+function getcommand(second) {
+    return commands[second[0]](second[1]);
 }
 
 //note "at" usually means "after touch"
@@ -69,97 +74,97 @@ function headers() {
 
 }
 
-function write(data) {
+var write = function(data) {
     var file = 'output.mid';
 }
 
-function endtrack() {
+var endtrack = function() {
     write('FF2F00');
-}
+};
 
 var noteoff = function(channel, note, velocity) {
     return '8'+channel+note+velocity;
-}
+};
 
 var noteon = function(channel, note, velocity) {
     return '9'+channel+note+velocity;
-}
+};
 
 var keyat = function(channel, note, velocity) {
     return 'A'+channel+note+velocity;
-}
+};
 
 var controlchange = function(channel, controller, value) {
     return 'B'+channel+controller+value;
-}
+};
 
 var programchange = function(channel, program) {
     return 'C'+channel+program;
-}
+};
 
 var channelat = function(channel, newchannel) {
     return 'D'+channel+newchannel;
-}
+};
 
 var pitchwheel = function(channel, bottom, top) {
     return 'E'+channel+bottom+top;
-}
+};
 
 //meta events
 //all meta events start with FF followed by the command xx, the length nn and the data dd
 var settracksequencenum = function(seq_num) {
     return 'FF0002'+seq_num;
-}
+};
 
 var textevent = function(text) {
     //nn here is byte length
     return 'FF01nn'+text;
-}
+};
 
 var copyrighttext = function(text) {
     return 'FF02nn'+text;
-}
+};
 
 var sequencetrackname = function(text) {
     return 'FF03nn'+text;
-}
+};
 
 var trackinstrumentname = function(text) {
     return 'FF04nn'+text;
-}
+};
 
 var lyric = function(text) {
     return 'FF05nn'+text;
-}
+};
 
 var marker = function(text) {
     return 'FF06nn'+text;
-}
+};
 
 var cuepoint = function(text) {
     return 'FF07nn'+text;
-}
+};
 
 var settempo = function(tempo) {
     //tempo arg is microseconds per quarter note so convert to BPM
     //should be 24 bits
     return 'FF5103'+tempo;
-}
+};
 
 var settimesignature = function(numerator, denominator) {
     //ccbb from the spec should mostly be 4 and 32
     return 'FF5804'+numerator+denominator+'0420'; //<-- not sure this is right
-}
+};
 
 var keysignature = function(key, mode) {
     //mode in the musical sense, short hand for major = 0/minor = 1
     //key actually represents the number of sharps and flats
     return 'FF5902'+key+mode;
-}
+};
 
 var sequencerinfo = function(bytes2send, data) {
     return 'FF7F'+bytes2send+data;
-}
+};
 
 //some necessary maps
 
@@ -174,12 +179,29 @@ var notes =  {
     7: 7, //g#
     8: 8, //a
     9: 9, //a#
-    A: 10 //b
+    a: 10, //b
+    b: 0, //c
+    c: 1, //c#
+    d: 2, //d
+    e: 3, //d#
+    f: 4 //e
 };
 
 var commands = {
+    0: noteon,
+    1: noteon,
+    2: noteoff,
+    3: noteon,
+    4: noteon,
+    5: noteoff,
+    6: noteon,
+    7: noteon,
+    8: noteoff,
+    9: noteon,
+    10: noteon,
+    a: noteoff,
     b: noteon,
-    c: noteoff,
+    c: noteon,
     d: keyat,
     e: channelat,
     f: noteoff
