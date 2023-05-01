@@ -1,15 +1,11 @@
-//dependencies
-var config = require('./config.js');
-var debug = require('debug')('app');
-var io = require('socket.io');
-var fs = require('fs');
-var midi = require('./libs/midi.js');
-var processor = require('./libs/process.js');
+const config = require('./config.js');
+const debug = require('debug')('app');
+const io = require('socket.io');
+const fs = require('fs');
+const midi = require('./libs/midi.js');
+const processor = require('./libs/process.js');
 
-//vars
-var output;
-
-//functions
+const output = '';
 
 function start() {
     if(process.argv.length == 2) {
@@ -20,7 +16,6 @@ function start() {
 }
 
 function read(path) {
-    //may need to specify encoding
     fs.readFile(path, 'hex', function(err, data) {
         if(err) {
             debug('file read error: '+err);

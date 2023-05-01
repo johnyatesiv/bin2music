@@ -1,12 +1,12 @@
-var debug = require('debug')('midi');
+const debug = require('debug')('midi');
 
 //docs on the file format: http://faydoc.tripod.com/formats/mid.htm
 
 function convert(first, second) {
-    var octave = null;
-    var note = null;
-    var command = null;
-    var output = null;
+    let octave = null;
+    let note = null;
+    let command = null;
+    let output = null;
 
     if(typeof first[1] == 'integer') {
         octave = first[1];
@@ -26,7 +26,6 @@ function convert(first, second) {
 
     debug(command);
 
-//    output = 'hi';
 //
 //    //TODO here is where everything stops, need to pass the args to the various functions as hex and write
 //
@@ -74,101 +73,101 @@ function headers() {
 
 }
 
-var write = function(data) {
-    var file = 'output.mid';
+const write = function(data) {
+    const file = 'output.mid';
 }
 
-var endtrack = function() {
+const endtrack = function() {
     write('FF2F00');
 };
 
-var noteoff = function(channel, note, velocity) {
+const noteoff = function(channel, note, velocity) {
     return '8'+channel+note+velocity;
 };
 
-var noteon = function(channel, note, velocity) {
+const noteon = function(channel, note, velocity) {
     return '9'+channel+note+velocity;
 };
 
-var keyat = function(channel, note, velocity) {
+const keyat = function(channel, note, velocity) {
     return 'A'+channel+note+velocity;
 };
 
-var controlchange = function(channel, controller, value) {
+const controlchange = function(channel, controller, value) {
     return 'B'+channel+controller+value;
 };
 
-var programchange = function(channel, program) {
+const programchange = function(channel, program) {
     return 'C'+channel+program;
 };
 
-var channelat = function(channel, newchannel) {
+const channelat = function(channel, newchannel) {
     return 'D'+channel+newchannel;
 };
 
-var pitchwheel = function(channel, bottom, top) {
+const pitchwheel = function(channel, bottom, top) {
     return 'E'+channel+bottom+top;
 };
 
 //meta events
 //all meta events start with FF followed by the command xx, the length nn and the data dd
-var settracksequencenum = function(seq_num) {
+const settracksequencenum = function(seq_num) {
     return 'FF0002'+seq_num;
 };
 
-var textevent = function(text) {
+const textevent = function(text) {
     //nn here is byte length
     return 'FF01nn'+text;
 };
 
-var copyrighttext = function(text) {
+const copyrighttext = function(text) {
     return 'FF02nn'+text;
 };
 
-var sequencetrackname = function(text) {
+const sequencetrackname = function(text) {
     return 'FF03nn'+text;
 };
 
-var trackinstrumentname = function(text) {
+const trackinstrumentname = function(text) {
     return 'FF04nn'+text;
 };
 
-var lyric = function(text) {
+const lyric = function(text) {
     return 'FF05nn'+text;
 };
 
-var marker = function(text) {
+const marker = function(text) {
     return 'FF06nn'+text;
 };
 
-var cuepoint = function(text) {
+const cuepoint = function(text) {
     return 'FF07nn'+text;
 };
 
-var settempo = function(tempo) {
+const settempo = function(tempo) {
     //tempo arg is microseconds per quarter note so convert to BPM
     //should be 24 bits
     return 'FF5103'+tempo;
 };
 
-var settimesignature = function(numerator, denominator) {
+const settimesignature = function(numerator, denominator) {
     //ccbb from the spec should mostly be 4 and 32
     return 'FF5804'+numerator+denominator+'0420'; //<-- not sure this is right
 };
 
-var keysignature = function(key, mode) {
+const keysignature = function(key, mode) {
     //mode in the musical sense, short hand for major = 0/minor = 1
     //key actually represents the number of sharps and flats
     return 'FF5902'+key+mode;
 };
 
-var sequencerinfo = function(bytes2send, data) {
+const sequencerinfo = function(bytes2send, data) {
     return 'FF7F'+bytes2send+data;
 };
 
 //some necessary maps
 
-var notes =  {
+const notes =  {
     0: 0, //c
     1: 1, //c#
     2: 2, //d
@@ -187,7 +186,7 @@ var notes =  {
     f: 4 //e
 };
 
-var commands = {
+const commands = {
     0: noteon,
     1: noteon,
     2: noteoff,
@@ -207,7 +206,7 @@ var commands = {
     f: noteoff
 };
 
-var midi = {};
+const midi = {};
 
 midi.convert = convert;
 midi.endtrack = endtrack;
